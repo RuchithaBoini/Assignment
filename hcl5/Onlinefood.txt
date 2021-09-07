@@ -1,0 +1,133 @@
+
+mysql> show tables;
++------------------------+
+| Tables_in_onlinefooddb |
++------------------------+
+| customers              |
+| ordermenus             |
+| orders                 |
+| restaurants            |
+| rmenuitems             |
++------------------------+
+5 rows in set (0.94 sec)
+
+mysql> select * from restaurants;
++-------+-----------+----------+---------+------------+
+| Resid | rname     | raddress | rcity   | contactnum |
++-------+-----------+----------+---------+------------+
+|     1 | Haveli    | hnk      | wgl     | 9123456780 |
+|     2 | bawarachi | kzt      | vzg     | 7123456890 |
+|     3 | swarna    | ESI      | hyd     | 6123457890 |
+|     4 | kakatiya  | hnk      | wgl     | 6098712345 |
+|     5 | foodaboo  | dik      | chennai | 9876543210 |
++-------+-----------+----------+---------+------------+
+5 rows in set (0.06 sec)
+
+mysql> select * from rmenuitems;
++---------+-------+-----------+------------+-----------+----------------+--------------+
+| Rmenuid | Resid | Menuname  | menutype   | menuprice | menudesc       | menucategory |
++---------+-------+-----------+------------+-----------+----------------+--------------+
+|       1 |     5 | biryani   | maincourse |       500 | chickenbiryani | nonveg       |
+|       2 |     2 | friedrice | starter    |       200 | vegfriedrice   | veg          |
+|       3 |     3 | noodles   | starter    |       100 | chickennoodles | nonveg       |
+|       4 |     4 | manchuria | starter    |       160 | gobimanchiuria | veg          |
+|       5 |     3 | thali     | maincourse |       400 | vegthali       | veg          |
++---------+-------+-----------+------------+-----------+----------------+--------------+
+5 rows in set (0.19 sec)
+
+mysql> select * from customers;
++-----+----------+----------+------------+---------+--------+
+| Cid | Cname    | Ccity    | Cdob       | Cgender | Cpw    |
++-----+----------+----------+------------+---------+--------+
+|  20 | ramani   | mysore   | 1997-06-28 | F       | r12as  |
+|  22 | rahim    | hnk      | 1997-09-29 | M       | rahi23 |
+|  27 | manu     | uk       | 1999-12-27 | M       | ru2079 |
+|  34 | lakshika | chennai  | 1998-03-28 | F       | lask23 |
+|  45 | abhi     | banglore | 2000-01-29 | M       | abh13  |
++-----+----------+----------+------------+---------+--------+
+5 rows in set (0.02 sec)
+
+mysql> select * from orders;
++---------+-------+------------+-----------------+---------------+
+| orderid | cusid | orderdate  | deliveryaddress | orderstatus   |
++---------+-------+------------+-----------------+---------------+
+|       1 |    20 | 2019-03-18 | hnk             | delivered     |
+|       2 |    22 | 2021-09-12 | wgl             | notdelievered |
+|       3 |    27 | 2020-07-20 | chennai         | delivered     |
+|       4 |    34 | 2022-09-19 | banglore        | not delivered |
+|       5 |    45 | 2019-12-27 | mysore          | delivered     |
++---------+-------+------------+-----------------+---------------+
+5 rows in set (0.00 sec)
+
+mysql> select * from ordermenus;
++---------+--------+--------------+-----------+
+| orderid | menuid | menuquantity | menuprice |
++---------+--------+--------------+-----------+
+|       3 |      5 | 2kg          |      3000 |
+|       2 |      1 | 3kg          |      2000 |
+|       1 |      4 | 2kg          |      1400 |
+|       4 |      2 | 250gms       |      2100 |
+|       3 |      1 | 1kg          |      5000 |
+|       5 |      2 | 3kg          |      4000 |
++---------+--------+--------------+-----------+
+6 rows in set (0.00 sec)
+
+
+mysql> select rname from restaurants where rcity='wgl';
++----------+
+| rname    |
++----------+
+| Haveli   |
+| kakatiya |
++----------+
+2 rows in set (0.00 sec)
+
+mysql> select restaurants.resid,restaurants.rname,rmenuitems.rmenuid,rmenuitems.menuname,rmenuitems.menuprice from restaurants inner join rmenuitems ON restaurants.resid=rmenuitems.rmenuid;
++-------+-----------+---------+-----------+-----------+
+| resid | rname     | rmenuid | menuname  | menuprice |
++-------+-----------+---------+-----------+-----------+
+|     1 | Haveli    |       1 | biryani   |       500 |
+|     2 | bawarachi |       2 | friedrice |       200 |
+|     3 | swarna    |       3 | noodles   |       100 |
+|     4 | kakatiya  |       4 | manchuria |       160 |
+|     5 | foodaboo  |       5 | thali     |       400 |
++-------+-----------+---------+-----------+-----------+
+5 rows in set (0.13 sec)
+
+mysql> select restaurants.resid,restaurants.rname,rmenuitems.rmenuid,rmenuitems.menuname,rmenuitems.menuprice from restaurants inner join rmenuitems ON restaurants.resid=rmenuitems.rmenuid where restaurants.rcity='wgl';
++-------+----------+---------+-----------+-----------+
+| resid | rname    | rmenuid | menuname  | menuprice |
++-------+----------+---------+-----------+-----------+
+|     1 | Haveli   |       1 | biryani   |       500 |
+|     4 | kakatiya |       4 | manchuria |       160 |
++-------+----------+---------+-----------+-----------+
+2 rows in set (0.10 sec)
+
+mysql> select orders.orderid,ordermenus.menuid,RMenuItems.menuname,RMenuItems.menutype,RMenuItems.menuprice from ((ordermenus inner join orders on ordermenus.menuid = orders.orderid) inner join RMenuItems on ordermenus.menuid=RMenuItems.RMenuID ) where orders.cusid=45;
++---------+--------+----------+------------+-----------+
+| orderid | menuid | menuname | menutype   | menuprice |
++---------+--------+----------+------------+-----------+
+|       5 |      5 | thali    | maincourse |       400 |
++---------+--------+----------+------------+-----------+
+1 row in set (0.00 sec)
+
+mysql> select * from orders inner join ordermenus on orders.orderid = ordermenus.menuid where orders.cusid = 34;
++---------+-------+------------+-----------------+---------------+---------+--------+--------------+-----------+
+| orderid | cusid | orderdate  | deliveryaddress | orderstatus   | orderid | menuid | menuquantity | menuprice |
++---------+-------+------------+-----------------+---------------+---------+--------+--------------+-----------+
+|       4 |    34 | 2022-09-19 | banglore        | not delivered |       1 |      4 | 2kg          |      1400 |
++---------+-------+------------+-----------------+---------------+---------+--------+--------------+-----------+
+1 row in set (0.00 sec)
+
+mysql> select * from orders inner join ordermenus on orders.orderid = ordermenus.menuid where orders.cusid = 45;
++---------+-------+------------+-----------------+-------------+---------+--------+--------------+-----------+
+| orderid | cusid | orderdate  | deliveryaddress | orderstatus | orderid | menuid | menuquantity | menuprice |
++---------+-------+------------+-----------------+-------------+---------+--------+--------------+-----------+
+|       5 |    45 | 2019-12-27 | mysore          | delivered   |       3 |      5 | 2kg          |      3000 |
++---------+-------+------------+-----------------+-------------+---------+--------+--------------+-----------+
+1 row in set (0.00 sec)
+
+mysql>
+
+
+
